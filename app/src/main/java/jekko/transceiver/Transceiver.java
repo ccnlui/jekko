@@ -1,4 +1,4 @@
-package jekko;
+package jekko.transceiver;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.HOURS;
