@@ -46,21 +46,21 @@ public class Client implements Callable<Void>
     {
         final String outChannel = aeronIpcOrUdpChannel(pubEndpoint);
         final int outStream = 4297;
-        final IdleStrategy idleStrategy = new BusySpinIdleStrategy();
 
         final MediaDriver mediaDriver = launchEmbeddedMediaDriverIfConfigured();
         String defaultAeronDirName = mediaDriver == null ? null : mediaDriver.aeronDirectoryName();
         final Aeron aeron = connectAeron(defaultAeronDirName);
 
         // construct publication and subscription
-        // final Publication pub = aeron.addPublication(outChannel, outStream);
+        final Publication pub = aeron.addPublication(outChannel, outStream);
 
-        // LOG.info("marshaller: in: {}:{}", inChannel, inStream);
+        // LOG.info("client: in: {}:{}", inChannel, inStream);
         LOG.info("client: out: {}:{}", outChannel, outStream);
 
         AeronTransceiver transceiver = new AeronTransceiver(mediaDriver, aeron, embeddedMediaDriver);
         new LoadTestRig(transceiver).run();
 
+        closeIfNotNull(pub);
         closeIfNotNull(aeron);
         closeIfNotNull(mediaDriver);
         return null;
