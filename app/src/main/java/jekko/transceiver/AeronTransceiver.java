@@ -1,18 +1,17 @@
 package jekko.transceiver;
 
-import io.aeron.Aeron;
-import io.aeron.Publication;
-import io.aeron.driver.MediaDriver;
-import jekko.Config;
-
+import static jekko.Util.aeronIpcOrUdpChannel;
+import static jekko.Util.closeIfNotNull;
+import static jekko.Util.connectAeron;
 import static jekko.Util.launchEmbeddedMediaDriverIfConfigured;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static jekko.Util.connectAeron;
-import static jekko.Util.aeronIpcOrUdpChannel;
-import static jekko.Util.closeIfNotNull;
+import io.aeron.Aeron;
+import io.aeron.Publication;
+import io.aeron.driver.MediaDriver;
+import jekko.Config;
 
 public final class AeronTransceiver extends Transceiver
 {
