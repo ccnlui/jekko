@@ -29,6 +29,8 @@ public abstract class Transceiver
 
     public abstract void receive();
 
+    public abstract void close() throws Exception;
+
     final void reset()
     {
         histogram.reset();
