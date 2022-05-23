@@ -16,8 +16,13 @@ public class LoadTestRig
         this.transceiver = transceiver;
     }
 
-    public void run()
+    public void run() throws InterruptedException
     {
         LOG.info("run load test!");
+        while (true)
+        {
+            LOG.info("{}", System.nanoTime());
+            Thread.sleep(1000);
+        }
     }
 }

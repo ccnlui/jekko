@@ -3,7 +3,6 @@ package jekko;
 import java.util.concurrent.Callable;
 
 import org.agrona.concurrent.BusySpinIdleStrategy;
-import org.agrona.concurrent.IdleStrategy;
 import org.agrona.concurrent.NoOpIdleStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +19,10 @@ import picocli.CommandLine.Option;
     description = "Send messages to echo server, measure RTT latencies in microseconds")
 public class Client implements Callable<Void>
 {
-    @Option(names = {"-h", "--help"}, usageHelp = true,
-        description = "help message")
+    @Option(names = {"-h", "--help"}, usageHelp = true, description = "help message")
     boolean help;
 
-    @Option(names = "--embedded-media-driver", defaultValue = "false",
+    @Option(names = "--embedded-media-driver",
         description = "launch with embedded media driver (default ${DEFAULT-VALUE})")
     boolean embeddedMediaDriver;
 
@@ -44,20 +42,17 @@ public class Client implements Callable<Void>
     @Override
     public Void call() throws Exception
     {
+        final MediaDriver mediaDriver = launchEmbeddedMediaDriverIfConfigured();
+        final Aeron aeron = connectAeron(mediaDriver);
+
         final String outChannel = aeronIpcOrUdpChannel(pubEndpoint);
         final int outStream = 4297;
-
-        final MediaDriver mediaDriver = launchEmbeddedMediaDriverIfConfigured();
-        String defaultAeronDirName = mediaDriver == null ? null : mediaDriver.aeronDirectoryName();
-        final Aeron aeron = connectAeron(defaultAeronDirName);
-
-        // construct publication and subscription
         final Publication pub = aeron.addPublication(outChannel, outStream);
 
         // LOG.info("client: in: {}:{}", inChannel, inStream);
         LOG.info("client: out: {}:{}", outChannel, outStream);
 
-        AeronTransceiver transceiver = new AeronTransceiver(mediaDriver, aeron, embeddedMediaDriver);
+        AeronTransceiver transceiver = new AeronTransceiver(mediaDriver, aeron);
         new LoadTestRig(transceiver).run();
 
         closeIfNotNull(pub);
@@ -87,14 +82,17 @@ public class Client implements Callable<Void>
         return null;
     }
 
-    private Aeron connectAeron(String defaultAeronDirName)
+    private Aeron connectAeron(MediaDriver mediaDriver)
     {
-        Aeron.Context aeronCtx = new Aeron.Context()
-            .idleStrategy(new NoOpIdleStrategy());
-        if (defaultAeronDirName != null)
-            aeronCtx = aeronCtx.aeronDirectoryName(defaultAeronDirName);
+        Aeron.Context aeronCtx = new Aeron.Context().idleStrategy(new NoOpIdleStrategy());
+        if (mediaDriver != null)
+        {
+            aeronCtx = aeronCtx.aeronDirectoryName(mediaDriver.aeronDirectoryName());
+        }
         else if (aeronDir != null)
+        {
             aeronCtx = aeronCtx.aeronDirectoryName(aeronDir);
+        }
         LOG.info(aeronCtx.toString());
 
         final Aeron aeron = Aeron.connect(aeronCtx);

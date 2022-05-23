@@ -8,7 +8,7 @@ public final class AeronTransceiver extends Transceiver
     private final MediaDriver mediaDriver;
     private final Aeron aeron;
 
-    public AeronTransceiver(final MediaDriver mediaDriver, final Aeron aeron, final boolean embeddedMediaDriver)
+    public AeronTransceiver(final MediaDriver mediaDriver, final Aeron aeron)
     {
         this.mediaDriver = mediaDriver;
         this.aeron = aeron;
