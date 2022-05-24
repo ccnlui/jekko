@@ -10,7 +10,6 @@ import org.agrona.concurrent.NoOpIdleStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.Level;
 import io.aeron.Aeron;
 import io.aeron.Publication;
 import io.aeron.driver.MediaDriver;
@@ -39,27 +38,29 @@ final class Util
                 .senderIdleStrategy(new NoOpIdleStrategy())
                 .receiverIdleStrategy(new NoOpIdleStrategy())
                 .dirDeleteOnShutdown(true);
-            if (Config.aeronDir != null)
+            if (Config.aeronDir != null && !Config.aeronDir.isEmpty())
             {
                 mediaDriverCtx = mediaDriverCtx.aeronDirectoryName(Config.aeronDir);
             }
-            LOG.info(mediaDriverCtx.toString());
-
             MediaDriver md = MediaDriver.launchEmbedded(mediaDriverCtx);
+            LOG.info(mediaDriverCtx.toString());
             return md;
         }
         return null;
     }
 
-    static Aeron connectAeron()
+    static Aeron connectAeron(MediaDriver mediaDriver)
     {
         Aeron.Context aeronCtx = new Aeron.Context().idleStrategy(new NoOpIdleStrategy());
-        if (Config.aeronDir != null)
+        if (mediaDriver != null)
+        {
+            aeronCtx = aeronCtx.aeronDirectoryName(mediaDriver.aeronDirectoryName());
+        }
+        else if (Config.aeronDir != null && !Config.aeronDir.isEmpty())
         {
             aeronCtx = aeronCtx.aeronDirectoryName(Config.aeronDir);
         }
         LOG.info(aeronCtx.toString());
-
         return Aeron.connect(aeronCtx);
     }
 

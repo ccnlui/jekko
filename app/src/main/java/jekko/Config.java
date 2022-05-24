@@ -3,8 +3,6 @@ package jekko;
 import org.agrona.concurrent.IdleStrategy;
 import org.agrona.concurrent.NoOpIdleStrategy;
 
-import ch.qos.logback.classic.Level;
-
 final class Config
 {
     private Config()
@@ -12,8 +10,8 @@ final class Config
     }
 
     // Media driver.
-    static boolean embeddedMediaDriver;
-    static String aeronDir;
+    static boolean embeddedMediaDriver = false;
+    static String aeronDir = "";
 
     // Client
     static String clientEndpoint = "";

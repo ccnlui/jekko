@@ -43,13 +43,8 @@ class AeronEchoNode implements EchoNode
 
     public AeronEchoNode()
     {
-        this(launchEmbeddedMediaDriverIfConfigured(), connectAeron());
-    }
-
-    public AeronEchoNode(final MediaDriver mediaDriver, final Aeron aeron)
-    {
-        this.mediaDriver = mediaDriver;
-        this.aeron = aeron;
+        this.mediaDriver = launchEmbeddedMediaDriverIfConfigured();
+        this.aeron = connectAeron(this.mediaDriver);
 
         final String inChannel = aeronIpcOrUdpChannel(Config.serverEndpoint);
         final int inStream = Config.serverStream;

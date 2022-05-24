@@ -40,14 +40,9 @@ public final class AeronTransceiver extends Transceiver
 
     public AeronTransceiver(NanoClock clock, Histogram histogram)
     {
-        this(clock, histogram, launchEmbeddedMediaDriverIfConfigured(), connectAeron());
-    }
-
-    public AeronTransceiver(NanoClock clock, Histogram histogram, final MediaDriver mediaDriver, final Aeron aeron)
-    {
         super(clock, histogram);
-        this.mediaDriver = mediaDriver;
-        this.aeron = aeron;
+        this.mediaDriver = launchEmbeddedMediaDriverIfConfigured();
+        this.aeron = connectAeron(this.mediaDriver);
 
         final String inChannel = aeronIpcOrUdpChannel(Config.clientEndpoint);
         final int inStream = Config.clientStream;

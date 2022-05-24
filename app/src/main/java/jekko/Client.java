@@ -2,10 +2,6 @@ package jekko;
 
 import java.util.concurrent.Callable;
 
-import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
