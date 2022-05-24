@@ -87,11 +87,12 @@ class AeronEchoNode implements EchoNode
             }
             echoedMsg += 1;
 
-            // Debug.
+            // Debug only.
             // long timestamp = buffer.getLong(offset, ByteOrder.LITTLE_ENDIAN);
             // int messageLength = length - Long.BYTES;
             // buffer.getBytes(offset+Long.BYTES, inBuf, 0, messageLength);
-            // LOG.debug("echoed: timestamp: {} msg: {} offset: {} length: {}",
+            // LOG.debug("echoed {}: timestamp: {} msg: {} offset: {} length: {}",
+            //     echoedMsg,
             //     timestamp,
             //     inBuf.getStringWithoutLengthAscii(0, messageLength),
             //     offset,

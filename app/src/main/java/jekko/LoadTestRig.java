@@ -55,10 +55,12 @@ final class LoadTestRig
             Config.messageLength,
             Config.batchSize
         );
-        sendAndReceive(msg, Config.iterations, Config.messageRate);
+        long sentMessages = sendAndReceive(msg, Config.iterations, Config.messageRate);
 
         LOG.info("Histogram of RTT latencies in microseconds");
         histogram.outputPercentileDistribution(System.out, 1000.0);  // output in us
+
+        warnIfTargetRateNotAchieved(sentMessages);
 
         transceiver.close();
     }
@@ -180,7 +182,7 @@ final class LoadTestRig
         return elapsedSeconds;
     }
 
-    byte[] generateMessage(final int messageLength)
+    private byte[] generateMessage(final int messageLength)
     {
         byte[] buf = new byte[messageLength];
         for (int i = 0; i < messageLength; i++)
@@ -188,5 +190,17 @@ final class LoadTestRig
             buf[i] = (byte) '1';
         }
         return buf;
+    }
+
+    private void warnIfTargetRateNotAchieved(final long sentMessages)
+    {
+        final long expectedTotalNumberOfMessages = Config.iterations * Config.messageRate;
+        if (sentMessages < expectedTotalNumberOfMessages)
+        {
+            LOG.warn("*** WARNING: Target message rate not achieved: expected to send {} messages in total but managed to send only {} messages!",
+                expectedTotalNumberOfMessages,
+                sentMessages
+            );
+        }
     }
 }

@@ -110,6 +110,7 @@ public final class AeronTransceiver extends Transceiver
             if (result <0)
             {
                 checkPublicationResult(result);
+                LOG.warn("failed to offer message: {}", Publication.errorString(result));
                 break;
             }
             if (result > 0)
