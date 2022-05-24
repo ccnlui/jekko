@@ -33,6 +33,7 @@ public class Server implements Callable<Void>
     {
         mergeConfig();
         new AeronEchoNode().run();
+        System.out.println("Bye!");
         return null;
     }
 

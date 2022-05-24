@@ -8,11 +8,12 @@ import static jekko.Util.launchEmbeddedMediaDriverIfConfigured;
 import static jekko.Util.retryPublicationResult;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 import org.agrona.DirectBuffer;
-import org.agrona.concurrent.IdleStrategy;
+import org.agrona.concurrent.Agent;
+import org.agrona.concurrent.AgentRunner;
 import org.agrona.concurrent.NanoClock;
+import org.agrona.concurrent.ShutdownSignalBarrier;
 import org.agrona.concurrent.SystemNanoClock;
 import org.agrona.concurrent.UnsafeBuffer;
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ import io.aeron.driver.MediaDriver;
 import io.aeron.logbuffer.FragmentHandler;
 import io.aeron.logbuffer.Header;
 
-class AeronEchoNode implements EchoNode
+class AeronEchoNode implements EchoNode, Agent
 {
     private static Logger LOG = LoggerFactory.getLogger(AeronEchoNode.class);
 
@@ -38,6 +39,8 @@ class AeronEchoNode implements EchoNode
     private final FragmentHandler assembler;
 
     private final NanoClock clock;
+    private long nowNs;
+    private long nextReportTimeNs;
     private long echoedMsg;
     private long droppedMsg;
 
@@ -56,6 +59,8 @@ class AeronEchoNode implements EchoNode
         this.inBuf = new UnsafeBuffer(ByteBuffer.allocateDirect(Config.maxMessageSize));
         this.assembler = new FragmentAssembler(this::onMessage);
         this.clock = SystemNanoClock.INSTANCE;
+        this.nowNs = clock.nanoTime();
+        this.nextReportTimeNs = nowNs + NANOS_PER_SECOND;
 
         // awaitConnected(
         //     () -> sub.isConnected(),
@@ -97,23 +102,19 @@ class AeronEchoNode implements EchoNode
     }
 
     @Override
-    public void run()
+    public void run() throws Exception
     {
-        long nowNs = clock.nanoTime();
-        long nextReportTimeNs = nowNs + NANOS_PER_SECOND;
-        final IdleStrategy idleStrategy = Config.idleStrategy;
+        final ShutdownSignalBarrier barrier = new ShutdownSignalBarrier();
+        AgentRunner agentRunner = new AgentRunner(
+            Config.idleStrategy,
+            Throwable::printStackTrace,
+            null,
+            this
+        );
+        AgentRunner.startOnThread(agentRunner);
 
-        while (true)
-        {
-            int fragments = sub.poll(this.assembler, 10);
-            nowNs = clock.nanoTime();
-            if (nextReportTimeNs <= nowNs)
-            {
-                LOG.info("echoed: {} dropped: {}", echoedMsg, droppedMsg);
-                nextReportTimeNs += NANOS_PER_SECOND;
-            }
-            idleStrategy.idle(fragments);
-        }
+        barrier.await();
+        close();
     }
 
     @Override
@@ -122,5 +123,24 @@ class AeronEchoNode implements EchoNode
         closeIfNotNull(sub);
         closeIfNotNull(aeron);
         closeIfNotNull(mediaDriver);
+    }
+
+    @Override
+    public int doWork() throws Exception
+    {
+        int fragments = sub.poll(this.assembler, 10);
+        nowNs = clock.nanoTime();
+        if (nextReportTimeNs <= nowNs)
+        {
+            LOG.info("echoed: {} dropped: {}", echoedMsg, droppedMsg);
+            nextReportTimeNs += NANOS_PER_SECOND;
+        }
+        return fragments;
+    }
+
+    @Override
+    public String roleName()
+    {
+        return "aeron-echo-node";
     }
 }

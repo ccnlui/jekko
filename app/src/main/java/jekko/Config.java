@@ -25,8 +25,8 @@ final class Config
     static int warmUpIterations = 10;
     static int warmUpMessageRate = 20_000;
     static int iterations = 10;
-    static int messageRate = 200_000;
-    static int messageLength = 16;
+    static int messageRate = 500_000;
+    static int messageLength = 100;
     static int batchSize = 1;
     static int maxMessageSize = 1024;
 
