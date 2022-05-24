@@ -72,18 +72,18 @@ public final class AeronTransceiver extends Transceiver
     private void onMessage(DirectBuffer buffer, int offset, int length, Header header)
     {
         final long timestamp = buffer.getLong(offset, ByteOrder.LITTLE_ENDIAN);
-        final int messagePos = offset + Long.BYTES;
-        final int messageLength = length - Long.BYTES;
-        buffer.getBytes(messagePos, inBuf, 0, messageLength);
-        LOG.debug("received: timestamp: {} msg: {} offset: {} length: {}",
-            timestamp,
-            inBuf.getStringWithoutLengthAscii(0, messageLength),
-            offset,
-            length
-        );
-
         histogram.recordValue(clock.nanoTime() - timestamp);
         receivedMessages.getAndIncrement();
+        // Debug only.
+        // final int messagePos = offset + Long.BYTES;
+        // final int messageLength = length - Long.BYTES;
+        // buffer.getBytes(messagePos, inBuf, 0, messageLength);
+        // LOG.debug("received: timestamp: {} msg: {} offset: {} length: {}",
+        //     timestamp,
+        //     inBuf.getStringWithoutLengthAscii(0, messageLength),
+        //     offset,
+        //     length
+        // );
     }
 
     @Override
@@ -100,10 +100,11 @@ public final class AeronTransceiver extends Transceiver
         int count = 0;
         for (int i = 0; i < numberOfMessages; i++)
         {
-            LOG.debug("send: timestamp: {} msg: {}",
-                timestamp,
-                outBuf.getStringWithoutLengthAscii(8, messageLength)
-            );
+            // Debug only.
+            // LOG.debug("send: timestamp: {} msg: {}",
+            //     timestamp,
+            //     outBuf.getStringWithoutLengthAscii(8, messageLength)
+            // );
 
             final long result = pub.offer(outBuf, 0, Long.BYTES+messageLength);
             if (result <0)

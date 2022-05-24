@@ -36,7 +36,6 @@ public class Client implements Callable<Void>
     public Void call() throws Exception
     {
         mergeConfig();
-        Util.setLogbackLoggerLevel(Config.logLevel);
         new LoadTestRig("aeron").run();
         return null;
     }

@@ -35,7 +35,4 @@ final class Config
 
     static IdleStrategy idleStrategy = new NoOpIdleStrategy();
     static long connectionTimeoutNs = 10_000_000_000L;
-
-    // Log
-    static Level logLevel = Level.INFO;
 }

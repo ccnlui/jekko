@@ -32,7 +32,6 @@ public class Server implements Callable<Void>
     public Void call() throws Exception
     {
         mergeConfig();
-        Util.setLogbackLoggerLevel(Config.logLevel);
         new AeronEchoNode().run();
         return null;
     }
