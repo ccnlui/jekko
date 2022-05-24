@@ -2,7 +2,6 @@ package jekko;
 
 import java.util.concurrent.Callable;
 
-import jekko.echonode.AeronEchoNode;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -33,6 +32,7 @@ public class Server implements Callable<Void>
     public Void call() throws Exception
     {
         mergeConfig();
+        Util.setLogbackLoggerLevel(Config.logLevel);
         new AeronEchoNode().run();
         return null;
     }

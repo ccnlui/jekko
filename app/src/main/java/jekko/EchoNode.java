@@ -1,4 +1,4 @@
-package jekko.echonode;
+package jekko;
 
 public abstract interface EchoNode
 {
